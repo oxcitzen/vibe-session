@@ -52,7 +52,7 @@ python app.py
 ```
 
 Then open:
-- `http://127.0.0.1:8000/`
+- `http://localhost:8000/`
 
 In the web UI you can enter:
 - **Ingredients**: `pasta, garlic, butter, parmesan`
