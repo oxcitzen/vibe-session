@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recipe Recommendations</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1>Recipe Recommendations</h1>
+        <p class="subtitle">
+          Enter comma-separated ingredients and get 2–3 structured recipe suggestions.
+        </p>
+      </header>
+
+      <section class="card">
+        <form id="recipe-form" class="form" autocomplete="off">
+          <label for="ingredients" class="label">Ingredients</label>
+          <textarea
+            id="ingredients"
+            class="textarea"
+            rows="3"
+            placeholder="e.g., pasta, garlic, butter, parmesan"
+            required
+          ></textarea>
+
+          <div class="actions">
+            <button type="submit" class="btn primary" id="submit-btn">
+              Generate
+            </button>
+            <button type="button" class="btn" id="clear-btn">Clear</button>
+          </div>
+
+          <div id="hint" class="hint">
+            Tip: Use commas to separate ingredients.
+          </div>
+        </form>
+      </section>
+
+      <section class="status" aria-live="polite">
+        <div id="loading" class="loading hidden">
+          <div class="spinner" aria-hidden="true"></div>
+          <span>Generating recipes…</span>
+        </div>
+        <div id="error" class="error hidden"></div>
+      </section>
+
+      <section class="results">
+        <div class="results-header">
+          <h2>Output (Structured JSON)</h2>
+          <button type="button" class="btn small hidden" id="copy-btn">
+            Copy JSON
+          </button>
+        </div>
+        <pre id="json-output" class="json-output hidden"></pre>
+
+        <h2 class="mt">Recipes</h2>
+        <div id="recipes" class="recipes"></div>
+      </section>
+    </main>
+
+    <script src="/static/script.js"></script>
+  </body>
+</html>
+
