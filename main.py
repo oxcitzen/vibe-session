@@ -8,7 +8,7 @@ from typing import List
 
 from src.config import Config
 from src.recipe_generator import RecipeGenerator
-from src.utils import parse_ingredients
+from src.utils import parse_user_input
 
 # Configure logging
 logging.basicConfig(
@@ -75,13 +75,18 @@ Note: In PowerShell, always use quotes around the ingredients string.
     try:
         # Parse ingredients
         logger.info("Parsing ingredients...")
-        ingredients = parse_ingredients(ingredients_str)
+        ingredients, dietary_restrictions = parse_user_input(ingredients_str)
         print(f"\nInput ingredients: {', '.join(ingredients)}")
+        if dietary_restrictions:
+            print(f"Dietary restrictions: {', '.join(dietary_restrictions)}")
         print("Generating recipe recommendations...\n")
         
         # Generate recipes
         generator = RecipeGenerator()
-        recipe_response = generator.generate_recipes(ingredients)
+        recipe_response = generator.generate_recipes(
+            ingredients,
+            dietary_restrictions=dietary_restrictions,
+        )
         
         # Display results
         display_recipes(recipe_response)

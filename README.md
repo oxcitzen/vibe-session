@@ -10,12 +10,14 @@ You can use it as:
 
 - Accepts comma-separated ingredients via CLI
 - Minimal web UI with an ingredient input box
+- Optional dietary restrictions filtering (e.g., vegan, gluten-free)
 - Generates 2-3 recipe suggestions using OpenAI API
 - Returns structured JSON output with:
   - Recipe name and ingredients
   - Step-by-step instructions
   - Cooking time and difficulty level
   - Basic nutritional information
+  - Dietary restrictions each recipe complies with
 - Validates output using Pydantic models
 - Robust error handling and retry logic
 
@@ -52,6 +54,10 @@ python app.py
 Then open:
 - `http://127.0.0.1:8000/`
 
+In the web UI you can enter:
+- **Ingredients**: `pasta, garlic, butter, parmesan`
+- **Dietary restrictions (optional)**: `vegan, gluten-free`
+
 ### API
 
 - **POST** `/api/recipes`
@@ -60,6 +66,15 @@ Then open:
     { "ingredients": "pasta, garlic, butter, parmesan" }
     ```
   - **Response**: structured JSON `RecipeResponse`
+  - **Dietary restrictions** (either option):
+    - **Option A (preferred)**: add a separate field:
+      ```json
+      { "ingredients": "pasta, garlic, butter, parmesan", "dietaryRestrictions": "vegan, gluten-free" }
+      ```
+    - **Option B**: append to the ingredients string:
+      ```json
+      { "ingredients": "pasta, garlic, butter, parmesan | vegan, gluten-free" }
+      ```
 
 - **GET** `/health`
   - Returns: `{"status":"healthy"}`
@@ -76,6 +91,14 @@ Or with quotes for better parsing:
 
 ```bash
 python main.py "pasta, garlic, butter, parmesan"
+```
+
+### CLI with dietary restrictions
+
+Append restrictions at the end using `|` (or `;`):
+
+```bash
+python main.py "pasta, garlic, butter, parmesan | vegan, gluten-free"
 ```
 
 ## Example Output
@@ -97,7 +120,8 @@ python main.py "pasta, garlic, butter, parmesan"
         "calories": 450,
         "protein": "12g",
         "carbs": "60g"
-      }
+      },
+      "dietaryRestrictions": []
     }
   ]
 }

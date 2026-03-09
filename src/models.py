@@ -29,6 +29,10 @@ class Recipe(BaseModel):
     cookingTime: str = Field(..., description="Estimated cooking time (e.g., '20 minutes')")
     difficulty: str = Field(..., description="Difficulty level: Easy, Medium, or Hard")
     nutrition: Nutrition = Field(..., description="Nutritional information")
+    dietaryRestrictions: List[str] = Field(
+        default_factory=list,
+        description="Dietary restrictions this recipe complies with (e.g., 'vegan', 'gluten-free')",
+    )
     
     @field_validator("difficulty")
     @classmethod
@@ -46,6 +50,22 @@ class Recipe(BaseModel):
         if not v or len(v) == 0:
             raise ValueError("List cannot be empty")
         return [item.strip() for item in v if item.strip()]
+
+    @field_validator("dietaryRestrictions")
+    @classmethod
+    def validate_dietary_restrictions(cls, v: List[str]) -> List[str]:
+        """Normalize dietary restrictions."""
+        if not v:
+            return []
+        normalized = [str(item).strip().lower() for item in v if str(item).strip()]
+        # Deduplicate while preserving order
+        seen = set()
+        out: List[str] = []
+        for item in normalized:
+            if item not in seen:
+                seen.add(item)
+                out.append(item)
+        return out
 
 
 class RecipeResponse(BaseModel):

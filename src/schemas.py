@@ -14,6 +14,15 @@ class RecipeRequest(BaseModel):
         description="Comma-separated list of ingredients (e.g., 'pasta, garlic, butter')",
     )
 
+    dietaryRestrictions: str | None = Field(
+        default=None,
+        description=(
+            "Optional comma-separated dietary restrictions (e.g., 'vegan, gluten-free'). "
+            "Alternatively, append to ingredients with '|' like: "
+            "'pasta, garlic | vegan, gluten-free'."
+        ),
+    )
+
 
 # Re-export response schema for clarity at API layer.
 RecipeResponseSchema = RecipeResponse

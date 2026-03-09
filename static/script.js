@@ -1,5 +1,6 @@
 const form = document.getElementById("recipe-form");
 const ingredientsEl = document.getElementById("ingredients");
+const dietaryEl = document.getElementById("dietary");
 const clearBtn = document.getElementById("clear-btn");
 const submitBtn = document.getElementById("submit-btn");
 const copyBtn = document.getElementById("copy-btn");
@@ -48,6 +49,9 @@ function renderRecipe(recipe) {
 
   const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
   const instructions = Array.isArray(recipe.instructions) ? recipe.instructions : [];
+  const dietary = Array.isArray(recipe.dietaryRestrictions)
+    ? recipe.dietaryRestrictions
+    : [];
 
   const ingList = ingredients
     .map((i) => `<li>${escapeHtml(String(i))}</li>`)
@@ -66,6 +70,11 @@ function renderRecipe(recipe) {
         ${calories ? `<span class="pill"><strong>Calories</strong> ${escapeHtml(calories)}</span>` : ""}
         ${protein ? `<span class="pill"><strong>Protein</strong> ${protein}</span>` : ""}
         ${carbs ? `<span class="pill"><strong>Carbs</strong> ${carbs}</span>` : ""}
+        ${
+          dietary.length
+            ? `<span class="pill"><strong>Diet</strong> ${escapeHtml(dietary.join(", "))}</span>`
+            : ""
+        }
       </div>
 
       <div class="section-title">Ingredients</div>
@@ -91,11 +100,11 @@ function clearOutput() {
   copyBtn.classList.add("hidden");
 }
 
-async function postRecipes(ingredients) {
+async function postRecipes(ingredients, dietaryRestrictions) {
   const res = await fetch("/api/recipes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ingredients }),
+    body: JSON.stringify({ ingredients, dietaryRestrictions }),
   });
 
   const contentType = res.headers.get("content-type") || "";
@@ -120,6 +129,7 @@ form.addEventListener("submit", async (e) => {
   clearOutput();
 
   const ingredients = (ingredientsEl.value || "").trim();
+  const dietaryRestrictions = (dietaryEl?.value || "").trim();
   if (!ingredients) {
     showError("Please enter at least one ingredient.");
     return;
@@ -127,7 +137,7 @@ form.addEventListener("submit", async (e) => {
 
   setLoading(true);
   try {
-    const data = await postRecipes(ingredients);
+    const data = await postRecipes(ingredients, dietaryRestrictions || null);
     setJsonOutput(data);
 
     const recipes = Array.isArray(data.recipes) ? data.recipes : [];
@@ -141,6 +151,7 @@ form.addEventListener("submit", async (e) => {
 
 clearBtn.addEventListener("click", () => {
   ingredientsEl.value = "";
+  if (dietaryEl) dietaryEl.value = "";
   showError("");
   clearOutput();
   ingredientsEl.focus();

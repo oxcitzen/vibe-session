@@ -26,6 +26,14 @@
             required
           ></textarea>
 
+          <label for="dietary" class="label mt">Dietary restrictions (optional)</label>
+          <input
+            id="dietary"
+            class="textarea"
+            type="text"
+            placeholder="e.g., vegan, gluten-free"
+          />
+
           <div class="actions">
             <button type="submit" class="btn primary" id="submit-btn">
               Generate
@@ -34,7 +42,8 @@
           </div>
 
           <div id="hint" class="hint">
-            Tip: Use commas to separate ingredients.
+            Tip: Use commas to separate ingredients. You can also type
+            <code>ingredients | restrictions</code> in the ingredients box.
           </div>
         </form>
       </section>

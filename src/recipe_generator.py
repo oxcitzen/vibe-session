@@ -39,7 +39,8 @@ CRITICAL: You MUST respond with ONLY valid JSON, no other text, no markdown, no 
         "calories": number,
         "protein": "Xg",
         "carbs": "Xg"
-      }
+      },
+      "dietaryRestrictions": ["vegan", "gluten-free"]
     }
   ]
 }
@@ -52,14 +53,22 @@ Requirements:
 - Estimate nutritional information realistically
 - Instructions should be clear and actionable
 - You may suggest additional common ingredients if needed for the recipe
+- If the user provides dietary restrictions, ALL recipes MUST comply with them
+- Always include the "dietaryRestrictions" array in each recipe (empty array if none)
 - Return ONLY the JSON object, nothing else"""
     
-    def generate_recipes(self, ingredients: List[str], max_retries: int = 2) -> RecipeResponse:
+    def generate_recipes(
+        self,
+        ingredients: List[str],
+        dietary_restrictions: Optional[List[str]] = None,
+        max_retries: int = 2,
+    ) -> RecipeResponse:
         """
         Generate recipe recommendations based on ingredients.
         
         Args:
             ingredients: List of ingredient names
+            dietary_restrictions: Optional list of dietary restrictions (e.g., vegan, gluten-free)
             max_retries: Maximum number of retry attempts for API calls
             
         Returns:
@@ -71,8 +80,20 @@ Requirements:
         """
         if not ingredients:
             raise ValueError("At least one ingredient is required")
-        
-        user_prompt = f"Generate 2-3 recipe suggestions using these ingredients: {', '.join(ingredients)}"
+
+        restrictions = [r.strip().lower() for r in (dietary_restrictions or []) if r.strip()]
+        restrictions_str = ", ".join(restrictions)
+
+        if restrictions:
+            user_prompt = (
+                "Generate 2-3 recipe suggestions using these ingredients: "
+                f"{', '.join(ingredients)}. "
+                "Dietary restrictions (MUST comply): "
+                f"{restrictions_str}. "
+                "If a restriction cannot be satisfied, adjust by suggesting substitutes and clearly reflect compliance."
+            )
+        else:
+            user_prompt = f"Generate 2-3 recipe suggestions using these ingredients: {', '.join(ingredients)}"
         
         for attempt in range(max_retries + 1):
             try:
@@ -82,6 +103,19 @@ Requirements:
                 
                 # Parse and validate response
                 recipe_response = self._parse_response(response)
+
+                # If restrictions were requested, ensure the model echoed them (at minimum)
+                if restrictions:
+                    for recipe in recipe_response.recipes:
+                        # Normalize for comparison
+                        got = {r.strip().lower() for r in (recipe.dietaryRestrictions or [])}
+                        expected = set(restrictions)
+                        # Not a hard fail (LLM may omit), but nudge stability by requiring echo
+                        if not expected.issubset(got):
+                            raise ValueError(
+                                "Model output did not include all requested dietary restrictions "
+                                f"in dietaryRestrictions. Expected at least: {restrictions_str}"
+                            )
                 
                 logger.info(f"Successfully generated {len(recipe_response.recipes)} recipes")
                 return recipe_response
