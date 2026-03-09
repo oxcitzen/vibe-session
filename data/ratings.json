@@ -1,0 +1,19 @@
+{
+  "ratings": {
+    "vegan-pasta-pomodoro": {
+      "count": 1,
+      "sum": 4,
+      "avg": 4.0
+    },
+    "vegan-tomato-basil-pasta": {
+      "count": 1,
+      "sum": 4,
+      "avg": 4.0
+    },
+    "creamy-vegan-tomato-pasta": {
+      "count": 1,
+      "sum": 5,
+      "avg": 5.0
+    }
+  }
+}

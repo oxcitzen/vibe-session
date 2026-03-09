@@ -27,3 +27,18 @@ class RecipeRequest(BaseModel):
 # Re-export response schema for clarity at API layer.
 RecipeResponseSchema = RecipeResponse
 
+
+class RatingRequest(BaseModel):
+    """Request body for rating a recipe."""
+
+    recipeId: str = Field(..., min_length=6)
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+
+
+class RatingResponse(BaseModel):
+    """Rating summary response."""
+
+    recipeId: str
+    count: int
+    avg: float
+

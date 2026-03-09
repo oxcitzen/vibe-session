@@ -5,9 +5,11 @@ import json
 import logging
 import sys
 from typing import List
+from pathlib import Path
 
 from src.config import Config
 from src.recipe_generator import RecipeGenerator
+from src.ratings_store import RatingsStore
 from src.utils import parse_user_input
 
 # Configure logging
@@ -32,6 +34,34 @@ def display_recipes(recipe_response) -> None:
     print("="*60 + "\n")
     print(json.dumps(output, indent=2, ensure_ascii=False))
     print("\n" + "="*60)
+
+
+def prompt_for_ratings(recipe_response) -> None:
+    """
+    Prompt user to rate recipes (1-5) after generation and store locally.
+    """
+    store = RatingsStore(Path(__file__).resolve().parent / "data" / "ratings.json")
+    print("\nRate the recipes (1-5). Press Enter to skip.\n")
+
+    for recipe in recipe_response.recipes:
+        rid = getattr(recipe, "recipeId", None)
+        name = getattr(recipe, "name", "Recipe")
+        if not rid:
+            continue
+
+        while True:
+            raw = input(f'Rating for "{name}" (id: {rid}) [1-5 or Enter]: ').strip()
+            if raw == "":
+                break
+            try:
+                rating = int(raw)
+                if rating < 1 or rating > 5:
+                    raise ValueError("out of range")
+                summary = store.add_rating(rid, rating)
+                print(f"Saved. Avg: {summary['avg']} ({summary['count']})\n")
+                break
+            except Exception:
+                print("Please enter a number from 1 to 5, or press Enter to skip.")
 
 
 def main():
@@ -90,6 +120,7 @@ Note: In PowerShell, always use quotes around the ingredients string.
         
         # Display results
         display_recipes(recipe_response)
+        prompt_for_ratings(recipe_response)
         
         logger.info("Recipe generation completed successfully")
         

@@ -30,6 +30,7 @@ CRITICAL: You MUST respond with ONLY valid JSON, no other text, no markdown, no 
 {
   "recipes": [
     {
+      "recipeId": "short-stable-id",
       "name": "Recipe Name",
       "ingredients": ["ingredient1", "ingredient2"],
       "instructions": ["Step 1", "Step 2"],
@@ -55,6 +56,7 @@ Requirements:
 - You may suggest additional common ingredients if needed for the recipe
 - If the user provides dietary restrictions, ALL recipes MUST comply with them
 - Always include the "dietaryRestrictions" array in each recipe (empty array if none)
+- Always include a stable "recipeId" string for each recipe (use a short slug-like id; different recipes must have different ids)
 - Return ONLY the JSON object, nothing else"""
     
     def generate_recipes(

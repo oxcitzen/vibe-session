@@ -23,6 +23,7 @@ class Nutrition(BaseModel):
 class Recipe(BaseModel):
     """Recipe model with all required fields."""
     
+    recipeId: str = Field(..., description="Stable identifier for rating and tracking", min_length=6)
     name: str = Field(..., description="Name of the recipe", min_length=1)
     ingredients: List[str] = Field(..., description="List of ingredients", min_length=1)
     instructions: List[str] = Field(..., description="Step-by-step cooking instructions", min_length=1)

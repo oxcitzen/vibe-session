@@ -79,6 +79,21 @@ In the web UI you can enter:
 - **GET** `/health`
   - Returns: `{"status":"healthy"}`
 
+### Ratings API
+
+- **POST** `/api/ratings`
+  - **Body**:
+    ```json
+    { "recipeId": "garlic-butter-pasta", "rating": 5 }
+    ```
+  - **Response**:
+    ```json
+    { "recipeId": "garlic-butter-pasta", "count": 3, "avg": 4.67 }
+    ```
+
+- **GET** `/api/ratings/{recipeId}`
+  - Returns the rating summary for that recipeId (404 if none)
+
 ## Usage (CLI)
 
 Run the CLI with comma-separated ingredients:
@@ -101,6 +116,10 @@ Append restrictions at the end using `|` (or `;`):
 python main.py "pasta, garlic, butter, parmesan | vegan, gluten-free"
 ```
 
+### CLI recipe rating
+
+After recipes are printed, the CLI will prompt you to rate each recipe (1–5). Press Enter to skip.
+
 ## Example Output
 
 ```json
@@ -108,6 +127,7 @@ python main.py "pasta, garlic, butter, parmesan | vegan, gluten-free"
   "recipes": [
     {
       "name": "Garlic Butter Pasta",
+      "recipeId": "garlic-butter-pasta",
       "ingredients": ["pasta", "garlic", "butter", "parmesan"],
       "instructions": [
         "Boil pasta according to package instructions",

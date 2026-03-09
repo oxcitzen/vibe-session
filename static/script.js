@@ -38,6 +38,7 @@ function escapeHtml(s) {
 
 function renderRecipe(recipe) {
   const name = escapeHtml(recipe.name || "Untitled recipe");
+  const recipeId = escapeHtml(recipe.recipeId || "");
   const cookingTime = escapeHtml(recipe.cookingTime || "");
   const difficulty = escapeHtml(recipe.difficulty || "");
   const calories =
@@ -65,6 +66,7 @@ function renderRecipe(recipe) {
     <article class="recipe">
       <h3>${name}</h3>
       <div class="meta">
+        ${recipeId ? `<span class="pill"><strong>ID</strong> ${recipeId}</span>` : ""}
         ${cookingTime ? `<span class="pill"><strong>Time</strong> ${cookingTime}</span>` : ""}
         ${difficulty ? `<span class="pill"><strong>Difficulty</strong> ${difficulty}</span>` : ""}
         ${calories ? `<span class="pill"><strong>Calories</strong> ${escapeHtml(calories)}</span>` : ""}
@@ -75,6 +77,19 @@ function renderRecipe(recipe) {
             ? `<span class="pill"><strong>Diet</strong> ${escapeHtml(dietary.join(", "))}</span>`
             : ""
         }
+      </div>
+
+      <div class="section-title">Rate this recipe</div>
+      <div class="rating" data-recipe-id="${recipeId}">
+        ${[1, 2, 3, 4, 5]
+          .map(
+            (n) =>
+              `<button type="button" class="btn small rate-btn" data-rating="${n}" ${
+                recipeId ? "" : "disabled"
+              }>${n}</button>`
+          )
+          .join("")}
+        <span class="rating-status" aria-live="polite"></span>
       </div>
 
       <div class="section-title">Ingredients</div>
@@ -123,6 +138,20 @@ async function postRecipes(ingredients, dietaryRestrictions) {
   return data;
 }
 
+async function postRating(recipeId, rating) {
+  const res = await fetch("/api/ratings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ recipeId, rating }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = data?.detail ? String(data.detail) : "Failed to store rating";
+    throw new Error(message);
+  }
+  return data;
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   showError("");
@@ -146,6 +175,27 @@ form.addEventListener("submit", async (e) => {
     showError(err?.message || "Something went wrong.");
   } finally {
     setLoading(false);
+  }
+});
+
+// Event delegation for rating buttons
+recipesEl.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".rate-btn");
+  if (!btn) return;
+
+  const wrapper = btn.closest(".rating");
+  const recipeId = wrapper?.dataset?.recipeId || "";
+  const rating = Number(btn.dataset.rating || 0);
+  const statusEl = wrapper?.querySelector(".rating-status");
+
+  if (!recipeId || rating < 1 || rating > 5) return;
+
+  try {
+    if (statusEl) statusEl.textContent = "Saving…";
+    const summary = await postRating(recipeId, rating);
+    if (statusEl) statusEl.textContent = `Saved. Avg: ${summary.avg} (${summary.count})`;
+  } catch (err) {
+    if (statusEl) statusEl.textContent = err?.message || "Rating failed";
   }
 });
 
